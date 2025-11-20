@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             NawasenaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Malang",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
