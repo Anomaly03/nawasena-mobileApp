@@ -1,60 +1,105 @@
-// Mengelola State: Menyimpan status login (isLoading, isLoginSuccess) melalui StateFlow.
-// Menjalankan Tugas Menerima permintaan login(email, password) dari LoginScreen dan meneruskannya ke AuthRepository.
-
 package com.example.nawasena.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nawasena.data.model.User
 import com.example.nawasena.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// --- 1. DEFINISI STATE ---
-
-// Data Class yang merepresentasikan status UI (LoginScreen) saat ini
+// --- 1. DEFINISI STATE (Diperbarui) ---
+// Kita ganti 'isLoginSuccess' dengan 'currentUser'.
+// Jika currentUser != null, artinya login sukses.
 data class AuthUiState(
     val isLoading: Boolean = false,
-    val isLoginSuccess: Boolean = false,
+    val currentUser: User? = null,
     val errorMessage: String? = null
 )
 
 // --- 2. KELAS UTAMA VIEWMODEL ---
 
-class AuthViewModel() : ViewModel() {
-    private val authRepository: AuthRepository = AuthRepository()
+class AuthViewModel(
+    private val repository: AuthRepository // DI: Terima Repository dari luar
+) : ViewModel() {
 
-    // MutableStateFlow untuk menyimpan status dan mengizinkan ViewModel mengubahnya
+    // Menggunakan asStateFlow() agar lebih aman (Read-only di luar)
     private val _uiState = MutableStateFlow(AuthUiState())
+    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    // StateFlow yang diekspos ke Composable. UI hanya bisa MEMBACA dari sini.
-    val uiState: StateFlow<AuthUiState> = _uiState
+    // Cek apakah user sudah login sebelumnya (saat aplikasi baru dibuka)
+    init {
+        checkAutoLogin()
+    }
 
-    // Fungsi yang dipanggil dari LoginScreen (ketika tombol 'Masuk' ditekan)
-    fun login(email: String, password: String) {
-        // Hanya jalankan jika aplikasi tidak dalam status loading
-        if (_uiState.value.isLoading) return
-
-        // Gunakan coroutine scope untuk menjalankan operasi background (API Call)
-        viewModelScope.launch {
-            // 1. Set Status Loading
-            _uiState.value = AuthUiState(isLoading = true)
-
-            try {
-                // 2. Panggil Repository untuk proses Autentikasi
-                val success = authRepository.login(email, password) // Asumsi AuthRepository punya fungsi login
-
-                if (success) {
-                    // 3. Login Sukses
-                    _uiState.value = AuthUiState(isLoginSuccess = true)
-                } else {
-                    // 4. Login Gagal (dari response Repository, misalnya status 401)
-                    _uiState.value = AuthUiState(errorMessage = "Email atau Kata Sandi salah.")
+    private fun checkAutoLogin() {
+        if (repository.isUserLoggedIn()) {
+            _uiState.update { it.copy(isLoading = true) }
+            viewModelScope.launch {
+                // Mencoba ambil data profil user terbaru
+                // (Kamu bisa sesuaikan logic ini di repository jika mau)
+                val uid = repository.getCurrentUserUid()
+                if (uid != null) {
+                    // Login ulang diam-diam (mocking user object or fetch real data)
+                    // Agar simpel, kita anggap user ada dulu, nanti UI akan fetch data
+                    // Atau idealnya repository punya fungsi 'getCurrentUserData'
                 }
-            } catch (e: Exception) {
-                // 5. Kegagalan Jaringan/Exception
-                _uiState.value = AuthUiState(errorMessage = "Gagal terhubung ke server: ${e.message}")
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    // Fungsi Login
+    fun login(email: String, pass: String) {
+        viewModelScope.launch {
+            // 1. Set Loading
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            // 2. Panggil Repository
+            val result = repository.login(email, pass)
+
+            // 3. Update State berdasarkan hasil
+            result.onSuccess { user ->
+                _uiState.update {
+                    it.copy(isLoading = false, currentUser = user, errorMessage = null)
+                }
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = error.message ?: "Login Gagal")
+                }
+            }
+        }
+    }
+
+    // Fungsi Register (Wajib ada karena dipakai di RegisterScreen)
+    fun register(name: String, email: String, pass: String, phone: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val result = repository.register(name, email, pass, phone)
+
+            result.onSuccess { user ->
+                _uiState.update {
+                    it.copy(isLoading = false, currentUser = user, errorMessage = null)
+                }
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = error.message ?: "Registrasi Gagal")
+                }
+            }
+        }
+    }
+
+    // Fungsi Logout
+    fun logout() {
+        repository.logout()
+        _uiState.update { AuthUiState() } // Reset ke state awal
+    }
+
+    // Membersihkan pesan error setelah ditampilkan (opsional)
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 }
