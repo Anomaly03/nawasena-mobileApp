@@ -4,44 +4,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.nawasena.data.repository.AuthRepository
 import com.example.nawasena.ui.theme.NawasenaTheme
+import com.example.nawasena.ui.viewmodel.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // 1. SIAPKAN BAHAN (DEPENDENCIES)
+        // Kita inisialisasi Firebase di sini agar bisa dipakai di seluruh aplikasi
+        val auth = FirebaseAuth.getInstance()
+        val firestore = FirebaseFirestore.getInstance()
+
+        // 2. RAKIT REPOSITORY
+        // Repository butuh auth & firestore
+        val authRepository = AuthRepository(auth, firestore)
+
+        // 3. RAKIT VIEWMODEL
+        // ViewModel butuh repository
+        val authViewModel = AuthViewModel(authRepository)
+
         setContent {
             NawasenaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                // 4. JALANKAN APLIKASI
+                // Kita oper viewModel yang sudah jadi ke Navigasi utama
+                NawasenaApp(viewModel = authViewModel)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NawasenaTheme {
-        Greeting("Android")
     }
 }
