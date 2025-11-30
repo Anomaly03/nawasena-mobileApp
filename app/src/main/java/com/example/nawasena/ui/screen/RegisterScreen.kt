@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,13 +48,14 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-            Text(text = "Buat Akun Baru", style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Sign Up", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
                 value = name, onValueChange = { name = it },
                 label = { Text("Nama Lengkap") },
                 enabled = !uiState.isLoading, // PERBAIKAN
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
 
@@ -61,6 +63,7 @@ fun RegisterScreen(
                 value = email, onValueChange = { email = it },
                 label = { Text("Email") },
                 enabled = !uiState.isLoading,
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
 
@@ -69,6 +72,7 @@ fun RegisterScreen(
                 value = password, onValueChange = { password = it },
                 label = { Text("Password") },
                 enabled = !uiState.isLoading,
+                shape = RoundedCornerShape(16.dp),
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
             )

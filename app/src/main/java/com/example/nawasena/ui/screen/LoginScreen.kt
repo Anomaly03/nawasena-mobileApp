@@ -3,6 +3,7 @@ package com.example.nawasena.ui.screen
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +18,6 @@ fun LoginScreen(
     viewModel: AuthViewModel,
     onNavigateToRegister: () -> Unit
 ) {
-    // PERBAIKAN DISINI: Ambil uiState (Satu paket), bukan variable terpisah
     val uiState by viewModel.uiState.collectAsState()
 
     var email by remember { mutableStateOf("") }
@@ -25,7 +25,6 @@ fun LoginScreen(
 
     val context = LocalContext.current
 
-    // PERBAIKAN: Akses errorMessage dari uiState
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -42,7 +41,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Login Akun Anda", style = MaterialTheme.typography.headlineMedium)
+            Text("Sign In", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
@@ -51,6 +50,7 @@ fun LoginScreen(
                 label = { Text("Email") },
                 // PERBAIKAN: Akses isLoading dari uiState
                 enabled = !uiState.isLoading,
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
 
@@ -60,6 +60,7 @@ fun LoginScreen(
                 label = { Text("Kata Sandi") },
                 enabled = !uiState.isLoading,
                 visualTransformation = PasswordVisualTransformation(),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
             )
 

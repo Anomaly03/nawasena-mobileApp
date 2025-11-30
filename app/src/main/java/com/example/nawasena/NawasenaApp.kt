@@ -17,7 +17,7 @@ import com.example.nawasena.ui.viewmodel.AuthViewModel
 // --- 1. DEFINISI ROUTE ---
 object Route {
     const val LOGIN = "login"
-    const val REGISTER = "register" // Tambahan Route Register
+    const val REGISTER = "register"
     const val DASHBOARD = "dashboard"
     const val DETAIL_DESTINATION = "detail/{destinationId}"
 }
