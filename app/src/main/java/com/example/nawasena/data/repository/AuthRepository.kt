@@ -2,22 +2,29 @@
 
 package com.example.nawasena.data.repository
 
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.tasks.await
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 
-class AuthRepository()
-{
+class AuthRepository {
+
+    // Inisialisasi Firebase Auth instance
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+
     suspend fun login(email: String, password: String): Boolean {
-        // --- SIMULASI API CALL ---
+        return try {
+            // Panggil API Firebase secara asynchronous dan tunggu hasilnya (await)
+            val result = auth.signInWithEmailAndPassword(email, password).await()
 
-        // 1. Simulasikan latency jaringan selama 1 detik.
-        delay(1000)
+            // Jika result tidak null (berarti berhasil), kembalikan true
+            result.user != null
 
-        // 2. Simulasikan logika verifikasi server:
-        // Cek apakah email dan password cocok dengan data dummy (test@nawasena.com, nawasena)
-        return email == "test@nawasena.com" && password == "nawasena"
-
-        // Dalam implementasi nyata, ini akan terlihat seperti:
-        // val response = apiService.login(email, password)
-        // return response.isSuccessful
+        } catch (e: FirebaseAuthException) {
+            // Tangkap exception spesifik Firebase (misalnya, password salah, user tidak ditemukan)
+            false // gagal
+        } catch (e: Exception) {
+            // Tangkap exception umum (misalnya, masalah jaringan)
+            false // gagal
+        }
     }
 }

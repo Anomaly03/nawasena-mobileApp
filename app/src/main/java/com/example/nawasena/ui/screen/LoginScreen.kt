@@ -5,10 +5,12 @@
 package com.example.nawasena.ui.screen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.nawasena.ui.viewmodel.AuthViewModel
@@ -29,7 +31,16 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Masuk ke Nawasena") }) }
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        topBar = {
+            TopAppBar(
+                title = { Text("ANCOK") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer, // <--- PERUBAHAN DI SINI
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer // <--- PERUBAHAN DI SINI
+                )
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -39,7 +50,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Login Akun Anda", style = MaterialTheme.typography.headlineMedium)
+            Text("Login", style = MaterialTheme.typography.headlineMedium)
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -49,6 +60,7 @@ fun LoginScreen(
                 onValueChange = { email = it },
                 label = { Text("Email") },
                 enabled = !uiState.isLoading,
+                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
 
@@ -57,6 +69,7 @@ fun LoginScreen(
                 onValueChange = { password = it },
                 label = { Text("Kata Sandi") },
                 enabled = !uiState.isLoading,
+                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
             )
 
@@ -76,6 +89,7 @@ fun LoginScreen(
                 },
                 enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().height(50.dp)
+
             ) {
                 if (uiState.isLoading) {
                     Text("Memproses...")
@@ -87,7 +101,11 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(onClick = onNavigateToRegister) {
-                Text("Belum punya akun? Daftar Sekarang")
+                Text(
+                    "Belum punya akun? Daftar Sekarang",
+                    color = Color.Blue,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
