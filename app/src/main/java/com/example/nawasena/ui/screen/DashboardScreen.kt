@@ -43,7 +43,7 @@ fun DashboardScreen(
     currentLat: Double = 0.0,
     currentLong: Double = 0.0,
     onLogout: () -> Unit = {},
-    onDestinationClick: (String) -> Unit = {}
+    onDestinationClick: (String) -> Unit
 ) {
     // [INTEGRASI 3] Ambil data Real-time dari ViewModel
     val destinations by viewModel.uiDestinations.collectAsState()
@@ -88,7 +88,7 @@ fun DashboardScreen(
                             .size(56.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(Color(0xFF6B5DD3)) // Warna ungu
-                            .clickable { onDestinationClick("Home") },
+                            .clickable { onDestinationClick("dashboard") },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -114,7 +114,7 @@ fun DashboardScreen(
 
                     // Icon Profile
                     IconButton(
-                        onClick = { /* Handle profile */ },
+                        onClick = { onDestinationClick("profile") },
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(

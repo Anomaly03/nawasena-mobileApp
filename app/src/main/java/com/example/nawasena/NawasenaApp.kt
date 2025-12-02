@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.nawasena.ui.screen.DashboardScreen
 import com.example.nawasena.ui.screen.LoginScreen
+import com.example.nawasena.ui.screen.ProfileScreen
 import com.example.nawasena.ui.screen.RegisterScreen
 import com.example.nawasena.ui.viewmodel.AuthViewModel
 import com.example.nawasena.ui.viewmodel.DashboardViewModel // Import ini
@@ -20,6 +21,12 @@ object Route {
     const val REGISTER = "register"
     const val DASHBOARD = "dashboard"
     const val DETAIL_DESTINATION = "detail/{destinationId}"
+
+    // *** Routes untuk Bottom Nav ***
+    const val PROFILE = "profile"
+    const val HOME = "home"
+    const val SEARCH = "search"
+    const val FAVORITE = "favorite"
 }
 
 @Composable
@@ -71,10 +78,32 @@ fun NawasenaApp(
             DashboardScreen(
                 user = uiState.currentUser,
                 viewModel = dashboardViewModel,
-                currentLat = 0.0, // Nanti diisi dari GPS MainActivity
-                currentLong = 0.0,
-                onLogout = { /* ... */ },
-                onDestinationClick = { /* ... */ }
+                currentLat = userLat, // Gunakan parameter yang diterima oleh NawasenaApp
+                currentLong = userLong, // Gunakan parameter yang diterima oleh NawasenaApp
+
+                onDestinationClick = { route ->
+                    navController.navigate(route) // Navigasi ke Detail, Profile, Home, dll.
+                }
+            )
+        }
+        // ... Tambahkan Komponen Bottom Nav (Profile, Home, Search, Favorite)
+        composable(Route.PROFILE) {
+            // Placeholder - Anda akan menggunakan ProfileScreen di sini
+            ProfileScreen(
+                user = uiState.currentUser, // Mengoper data user yang sedang login
+
+                // Sediakan callback navigasi yang dibutuhkan ProfileScreen
+                onNavigateToHome = {
+                    navController.navigate(Route.DASHBOARD) {
+                        popUpTo(Route.DASHBOARD) { inclusive = true }
+                    }
+                },
+                onNavigateToSearch = {
+                    navController.navigate(Route.SEARCH)
+                },
+                onNavigateToFavorite = {
+                    navController.navigate(Route.FAVORITE)
+                }
             )
         }
 
