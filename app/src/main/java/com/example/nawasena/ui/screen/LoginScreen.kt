@@ -103,17 +103,13 @@ fun LoginScreen(
                                 fontWeight = FontWeight.Light
                             )
                         )
-                        Text("Sign In", style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                        )
                         Spacer(modifier = Modifier.height(32.dp))
 
                         // --- TEXT FIELDS ---
                         // Email
                         OutlinedTextField(
                             value = email,
+                            textStyle = androidx.compose.ui.text.TextStyle(color = androidx.compose.ui.graphics.Color.Black),
                             onValueChange = { email = it },
                             label = { Text("Email") },
                             enabled = !uiState.isLoading,
@@ -125,6 +121,7 @@ fun LoginScreen(
                             value = password,
                             onValueChange = { password = it },
                             label = { Text("Kata Sandi") },
+                            textStyle = androidx.compose.ui.text.TextStyle(color = androidx.compose.ui.graphics.Color.Black),
                             enabled = !uiState.isLoading,
                             shape = RoundedCornerShape(16.dp),
                             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),

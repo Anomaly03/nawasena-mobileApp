@@ -13,8 +13,8 @@ import com.example.nawasena.ui.screen.DashboardScreen
 import com.example.nawasena.ui.screen.LoginScreen
 import com.example.nawasena.ui.screen.RegisterScreen
 import com.example.nawasena.ui.viewmodel.AuthViewModel
+import com.example.nawasena.ui.viewmodel.DashboardViewModel // Import ini
 
-// --- 1. DEFINISI ROUTE ---
 object Route {
     const val LOGIN = "login"
     const val REGISTER = "register"
@@ -22,44 +22,32 @@ object Route {
     const val DETAIL_DESTINATION = "detail/{destinationId}"
 }
 
-// --- 2. FUNGSI UTAMA NAVIGASI ---
 @Composable
 fun NawasenaApp(
-    viewModel: AuthViewModel // Terima ViewModel dari MainActivity
+    authViewModel: AuthViewModel,
+    dashboardViewModel: DashboardViewModel,
+    userLat: Double,  // Tambahkan ini
+    userLong: Double  // Tambahkan ini
 ) {
     val navController = rememberNavController()
-
-    // Kita pantau state user secara global di level navigasi
-    // Agar jika user logout dari Dashboard, otomatis terlempar ke Login
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by authViewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
         startDestination = if (uiState.currentUser != null) Route.DASHBOARD else Route.LOGIN
     ) {
 
-        // --- SCREEN: LOGIN ---
+        // --- LOGIN & REGISTER (TIDAK BERUBAH) ---
         composable(Route.LOGIN) {
-            // Efek samping: Jika user berhasil login, pindah ke Dashboard
             LaunchedEffect(uiState.currentUser) {
                 if (uiState.currentUser != null) {
-                    navController.navigate(Route.DASHBOARD) {
-                        popUpTo(Route.LOGIN) { inclusive = true } // Hapus history agar tidak bisa back ke login
-                    }
+                    navController.navigate(Route.DASHBOARD) { popUpTo(Route.LOGIN) { inclusive = true } }
                 }
             }
-
-            LoginScreen(
-                viewModel = viewModel,
-                onNavigateToRegister = {
-                    navController.navigate(Route.REGISTER)
-                }
-            )
+            LoginScreen(viewModel = authViewModel, onNavigateToRegister = { navController.navigate(Route.REGISTER) })
         }
 
-        // --- SCREEN: REGISTER ---
         composable(Route.REGISTER) {
-            // Efek samping: Jika berhasil register, otomatis login & masuk Dashboard
             LaunchedEffect(uiState.currentUser) {
                 if (uiState.currentUser != null) {
                     navController.navigate(Route.DASHBOARD) {
@@ -68,42 +56,31 @@ fun NawasenaApp(
                     }
                 }
             }
-
-            RegisterScreen(
-                viewModel = viewModel,
-                onNavigateToLogin = {
-                    navController.popBackStack() // Kembali ke Login
-                }
-            )
+            RegisterScreen(viewModel = authViewModel, onNavigateToLogin = { navController.popBackStack() })
         }
 
-        // --- SCREEN: DASHBOARD ---
+        // --- DASHBOARD (DIUPDATE) ---
         composable(Route.DASHBOARD) {
-            // Cek keamanan: Jika user null (logout), lempar balik ke Login
             LaunchedEffect(uiState.currentUser) {
                 if (uiState.currentUser == null) {
-                    navController.navigate(Route.LOGIN) {
-                        popUpTo(Route.DASHBOARD) { inclusive = true }
-                    }
+                    navController.navigate(Route.LOGIN) { popUpTo(Route.DASHBOARD) { inclusive = true } }
                 }
             }
 
-            // Pastikan kamu sudah punya DashboardScreen.kt
-            // Jika belum, buat dummy sementara (lihat bawah)
+            // Kita oper 'dashboardViewModel' ke layarnya
             DashboardScreen(
                 user = uiState.currentUser,
-                onLogout = { viewModel.logout() },
-                onDestinationClick = { destinationId ->
-                    navController.navigate("detail/$destinationId")
-                }
+                viewModel = dashboardViewModel,
+                currentLat = 0.0, // Nanti diisi dari GPS MainActivity
+                currentLong = 0.0,
+                onLogout = { /* ... */ },
+                onDestinationClick = { /* ... */ }
             )
         }
 
-        // --- SCREEN: DETAIL ---
+        // --- DETAIL (Placeholder) ---
         composable(Route.DETAIL_DESTINATION) { backStackEntry ->
             val destinationId = backStackEntry.arguments?.getString("destinationId")
-
-            // Dummy Detail Screen
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Detail Destinasi ID: $destinationId")
             }
