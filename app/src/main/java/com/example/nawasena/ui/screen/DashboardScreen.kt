@@ -9,9 +9,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,21 +55,75 @@ fun DashboardScreen(
     Scaffold(
         containerColor = Color.White,
         bottomBar = {
-            // Placeholder Bottom Bar (Tetap sama)
             BottomAppBar(
                 containerColor = Color.White,
-                modifier = Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp),
+                contentPadding = PaddingValues(0.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {}) { Icon(Icons.Filled.LocationOn, "Home") }
-                    IconButton(onClick = {}) { Icon(Icons.Filled.Star, "Favorite") }
-                    FloatingActionButton(onClick = {}, modifier = Modifier.size(56.dp)) { Text("+") }
-                    IconButton(onClick = {}) { Icon(Icons.Filled.Search, "Chat") }
-                    IconButton(onClick = {}) { Icon(Icons.Filled.LocationOn, "Profile") }
+                    // Icon Search
+                    IconButton(
+                        onClick = { /* Handle search */ },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search",
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    // Icon Home (dengan background ungu)
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0xFF6B5DD3)) // Warna ungu
+                            .clickable { onDestinationClick("Home") },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = "Home",
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    // Icon Favorite (Heart)
+                    IconButton(
+                        onClick = { /* Handle favorite */ },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    // Icon Profile
+                    IconButton(
+                        onClick = { /* Handle profile */ },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Person,
+                            contentDescription = "Profile",
+                            tint = Color.Black,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
         }
@@ -143,17 +200,6 @@ fun DashboardScreen(
                     }
                 }
             }
-
-            // Tombol Logout
-            item {
-                Spacer(modifier = Modifier.height(50.dp).offset(y = -overlapDistance))
-                Button(
-                    onClick = onLogout,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).offset(y = -overlapDistance)
-                ) {
-                    Text("Keluar (Logout)")
-                }
-            }
         }
     }
 }
@@ -181,7 +227,7 @@ fun HomeHeader(
                 .zIndex(1f)
         ) {
             Text(
-                text = "Dashboard",
+                text = "Discover",
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 16.dp)
