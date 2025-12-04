@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,11 +17,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.nawasena.data.model.User
+// Import Entity Room yang baru dibuat
+import com.example.nawasena.data.local.UserProfile
 
 @Composable
 fun ProfileScreen(
-    user: User?,
+    userProfile: UserProfile?,
+    onNavigateToEdit: () -> Unit, // GANTI: Menerima data gabungan dari Room
     onNavigateToHome: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToFavorite: () -> Unit = {}
@@ -57,16 +58,17 @@ fun ProfileScreen(
                         .padding(top = 40.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Username di atas
+                    // Username di Header
                     Text(
-                        text = "$${user?.name ?: "Username"}",
+                        // Tampilkan Nama atau default "Pengguna"
+                        text = userProfile?.name ?: "Pengguna",
                         color = Color.White,
                         style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Light),
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Avatar
+                    // Avatar Placeholder
                     Box(
                         modifier = Modifier
                             .size(120.dp)
@@ -86,41 +88,46 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Form Fields
+            // Form Fields (Data diambil dari Room)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // 1. Nama
                 ProfileTextField(
                     icon = Icons.Outlined.Person,
-                    placeholder = "Nama", // GANTI
-                    value = user?.name ?: "" // GANTI
+                    placeholder = "Nama Lengkap",
+                    value = userProfile?.name ?: ""
                 )
 
+                // 2. Tanggal Lahir (Data Lokal)
                 ProfileTextField(
                     icon = Icons.Outlined.DateRange,
-                    placeholder = "DD-MM-YY", // GANTI
-                    value = "" // GANTI
+                    placeholder = "DD-MM-YY", // Placeholder jika kosong
+                    value = userProfile?.birthDate ?: ""
                 )
 
+                // 3. Nomor Telepon (Data Lokal)
                 ProfileTextField(
                     icon = Icons.Outlined.Phone,
-                    placeholder = "081391742759", // GANTI
-                    value = "" // GANTI
+                    placeholder = "Nomor Telepon",
+                    value = userProfile?.phoneNumber ?: ""
                 )
 
+                // 4. Email (Data Firebase yg disync ke Lokal)
                 ProfileTextField(
                     icon = Icons.Outlined.Email,
-                    placeholder = "ub.ac.id", // GANTI
-                    value = "" // GANTI
+                    placeholder = "Email",
+                    value = userProfile?.email ?: ""
                 )
 
+                // 5. Username (Data Lokal - misal @handle)
                 ProfileTextField(
                     icon = Icons.Outlined.AccountCircle,
-                    placeholder = "@shinysole_", // GANTI
-                    value = "" // GANTI
+                    placeholder = "Username",
+                    value = userProfile?.username ?: ""
                 )
             }
 
@@ -128,7 +135,8 @@ fun ProfileScreen(
 
             // Edit Profile Button
             Button(
-                onClick = { /* Handle edit profile */ },
+                // PERUBAHAN DISINI: Langsung panggil callback
+                onClick = onNavigateToEdit,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
@@ -148,6 +156,8 @@ fun ProfileScreen(
         }
     }
 }
+
+// --- Helper Composable tidak berubah ---
 
 @Composable
 fun ProfileTextField(

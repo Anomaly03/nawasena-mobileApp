@@ -3,19 +3,22 @@ package com.example.nawasena
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.nawasena.data.local.NawasenaDatabase
 import com.example.nawasena.data.repository.AuthRepository
 import com.example.nawasena.data.repository.DestinationRepository
+import com.example.nawasena.data.repository.ProfileRepository // IMPORT INI
 import com.example.nawasena.ui.theme.NawasenaTheme
 import com.example.nawasena.ui.viewmodel.AuthViewModel
 import com.example.nawasena.ui.viewmodel.DashboardViewModel
-import com.example.nawasena.utils.DestinationSeeder
+import com.example.nawasena.ui.viewmodel.ProfileViewModel
+import com.example.nawasena.ui.viewmodel.ProfileViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
@@ -37,10 +40,9 @@ class MainActivity : ComponentActivity() {
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
-            // Izin diterima/ditolak logic ada di setContent
+            // Logika izin bisa ditambahkan jika perlu
         }
 
-        // Minta izin saat aplikasi dibuka
         requestPermissionLauncher.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -48,16 +50,22 @@ class MainActivity : ComponentActivity() {
             )
         )
 
-        // --- 3. SETUP FIREBASE & MVVM ---
+        // --- 3. SETUP DATABASE & FIREBASE ---
+        val database = NawasenaDatabase.getDatabase(this)
+        val profileDao = database.profileDao()
+
         val auth = FirebaseAuth.getInstance()
         val firestore = FirebaseFirestore.getInstance()
 
-        // Rakit Auth
+        // --- 4. SETUP REPOSITORY ---
         val authRepository = AuthRepository(auth, firestore)
-        val authViewModel = AuthViewModel(authRepository)
-
-        // Rakit Dashboard
         val destinationRepository = DestinationRepository(firestore)
+
+        // Setup ProfileRepository (Gabungan DAO + Firestore)
+        val profileRepository = ProfileRepository(profileDao, firestore)
+
+        // --- 5. SETUP GLOBAL VIEWMODEL ---
+        val authViewModel = AuthViewModel(authRepository)
         val dashboardViewModel = DashboardViewModel(destinationRepository)
 
         setContent {
@@ -67,7 +75,6 @@ class MainActivity : ComponentActivity() {
                 var userLong by remember { mutableDoubleStateOf(0.0) }
 
                 // Ambil lokasi sekali saat aplikasi mulai
-                // PERBAIKAN: Hapus anotasi @RequiresPermission di sini karena bikin error syntax
                 LaunchedEffect(Unit) {
                     getUserLocation { lat, long ->
                         userLat = lat
@@ -75,10 +82,31 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                // --- 4. JALANKAN APLIKASI ---
+                // Ambil state user saat ini dari AuthViewModel
+                val authState by authViewModel.uiState.collectAsState()
+                val currentUser = authState.currentUser
+
+                // --- 6. SETUP PROFILE VIEWMODEL (DENGAN REPOSITORY) ---
+                val profileViewModel: ProfileViewModel = viewModel(
+                    key = currentUser?.uid, // Refresh VM jika user login/logout
+                    factory = ProfileViewModelFactory(
+                        repository = profileRepository, // Inject Repository di sini
+                        user = currentUser
+                    )
+                )
+
+                // Sinkronisasi data awal (Cloud -> Local) saat login
+                LaunchedEffect(currentUser) {
+                    currentUser?.let { user ->
+                        profileViewModel.ensureUserInRoom(user)
+                    }
+                }
+
+                // --- 7. JALANKAN APLIKASI ---
                 NawasenaApp(
                     authViewModel = authViewModel,
                     dashboardViewModel = dashboardViewModel,
+                    profileViewModel = profileViewModel,
                     userLat = userLat,
                     userLong = userLong
                 )
@@ -88,14 +116,13 @@ class MainActivity : ComponentActivity() {
 
     // --- FUNGSI HELPER AMBIL LOKASI ---
     private fun getUserLocation(onLocationReceived: (Double, Double) -> Unit) {
-        // Cek izin secara manual agar aman
         if (ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            return // Stop jika tidak ada izin
+            return
         }
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
