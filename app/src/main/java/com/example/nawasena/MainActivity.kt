@@ -17,12 +17,14 @@ import com.example.nawasena.data.repository.ProfileRepository // IMPORT INI
 import com.example.nawasena.ui.theme.NawasenaTheme
 import com.example.nawasena.ui.viewmodel.AuthViewModel
 import com.example.nawasena.ui.viewmodel.DashboardViewModel
+import com.example.nawasena.ui.viewmodel.DetailViewModel
 import com.example.nawasena.ui.viewmodel.ProfileViewModel
 import com.example.nawasena.ui.viewmodel.ProfileViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+
 
 class MainActivity : ComponentActivity() {
 
@@ -67,6 +69,7 @@ class MainActivity : ComponentActivity() {
         // --- 5. SETUP GLOBAL VIEWMODEL ---
         val authViewModel = AuthViewModel(authRepository)
         val dashboardViewModel = DashboardViewModel(destinationRepository)
+        val detailViewModel = DetailViewModel(destinationRepository) 
 
         setContent {
             NawasenaTheme {
@@ -107,6 +110,7 @@ class MainActivity : ComponentActivity() {
                     authViewModel = authViewModel,
                     dashboardViewModel = dashboardViewModel,
                     profileViewModel = profileViewModel,
+                    detailViewModel = detailViewModel,
                     userLat = userLat,
                     userLong = userLong
                 )
