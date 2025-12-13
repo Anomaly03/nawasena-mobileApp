@@ -14,8 +14,8 @@ data class Destination(
     val imageUrl: String = "",
 
     // --- UPDATE ---
-    val description: String = "Belum ada deskripsi.", // Tambahan
-    val viewCount: Int = 0, // Tambahan untuk hitung jumlah dilihat
+    val description: String = "Belum ada deskripsi.",
+    val viewCount: Int = 0,
     // --------------
 
     val rating: Double = 0.0,

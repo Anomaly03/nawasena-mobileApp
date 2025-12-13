@@ -106,7 +106,8 @@ fun NawasenaApp(
             if (destinationId != null) {
                 DetailScreen(
                     destinationId = destinationId,
-                    viewModel = detailViewModel, // Menggunakan parameter yang dikirim
+                    viewModel = detailViewModel,
+                    User = authUiState.currentUser, // <-- KIRIM DATA USER KE SINI
                     onBack = { navController.popBackStack() }
                 )
             }

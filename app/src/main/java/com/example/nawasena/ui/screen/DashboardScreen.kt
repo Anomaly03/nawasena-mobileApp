@@ -250,7 +250,8 @@ fun HomeHeader(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
                     focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedTextColor = Color.Black
                 )
             )
         }
@@ -332,7 +333,7 @@ fun HighlightCardItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Star, null, tint = Color.Yellow)
                     Text(
-                        text = "${data.rating} (${data.reviewCount} reviews)", // Format Rating
+                        text = "%.1f (%d reviews)".format(data.rating, data.reviewCount), // Format Rating
                         color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp)
                     )
                 }
@@ -373,7 +374,7 @@ fun SmallPlaceCard(
         // Rating & Jarak
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Star, null, tint = Color.Gray, modifier = Modifier.size(12.dp))
-            Text(text = "${data.rating}", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+            Text(text = "%.1f".format(data.rating), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = distance, style = MaterialTheme.typography.labelSmall, color = Color.Blue)
         }

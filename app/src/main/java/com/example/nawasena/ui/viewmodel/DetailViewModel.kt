@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nawasena.data.model.Destination
 import com.example.nawasena.data.model.Review
+import com.example.nawasena.data.model.User
 import com.example.nawasena.data.repository.DestinationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,13 +38,12 @@ class DetailViewModel(
         }
     }
 
-    fun submitReview(destId: String, user: Any?, rating: Int, comment: String) {
+    fun submitReview(destId: String, user: User?, rating: Int, comment: String) {
         // Asumsi user adalah object FirebaseUser, ambil nama dan UID
         // Sesuaikan dengan tipe data user kamu di AuthViewModel
-        val uid = "user123" // Ganti dengan user.uid
-        val name = "Pengunjung" // Ganti dengan user.displayName
-
-        if (rating == 0) return
+        if (user == null || rating == 0) return
+        val uid = user.uid
+        val name = user.name
 
         viewModelScope.launch {
             val newReview = Review(
