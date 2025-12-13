@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.nawasena.data.model.Review
+import com.example.nawasena.data.model.User
 import com.example.nawasena.ui.viewmodel.DetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +33,7 @@ import com.example.nawasena.ui.viewmodel.DetailViewModel
 fun DetailScreen(
     destinationId: String,
     viewModel: DetailViewModel,
+    User: com.example.nawasena.data.model.User?,
     onBack: () -> Unit
 ) {
     // Load data saat pertama kali dibuka
@@ -74,7 +76,7 @@ fun DetailScreen(
                             Icon(
                                 imageVector = if (star <= inputRating) Icons.Filled.Star else Icons.Outlined.Star,
                                 contentDescription = null,
-                                tint = Color(0xFFFFC107),
+                                tint = if (star <= inputRating) Color(0xFFFFC107) else Color.LightGray,
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clickable { inputRating = star }
@@ -97,7 +99,8 @@ fun DetailScreen(
                                 focusedContainerColor = Color(0xFFF5F5F5),
                                 unfocusedContainerColor = Color(0xFFF5F5F5),
                                 focusedBorderColor = Color.Transparent,
-                                unfocusedBorderColor = Color.Transparent
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedTextColor = Color.Black
                             )
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -105,11 +108,13 @@ fun DetailScreen(
                         // Tombol Kirim
                         Button(
                             onClick = {
-                                viewModel.submitReview(destinationId, null, inputRating, inputComment)
+                                // [3] PERBAIKAN LOGIC: Kirim object 'user' asli, bukan null
+                                viewModel.submitReview(destinationId, User, inputRating, inputComment)
                                 inputComment = ""
                                 inputRating = 0
                             },
-                            enabled = inputRating > 0 && inputComment.isNotBlank(),
+                            // Pastikan user tidak null saat mau kirim (opsional, tapi lebih aman)
+                            enabled = inputRating > 0 && inputComment.isNotBlank() && User != null,
                             contentPadding = PaddingValues(0.dp),
                             modifier = Modifier.size(50.dp),
                             shape = CircleShape
@@ -132,8 +137,8 @@ fun DetailScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues), // [FIX 3] Padding dari Scaffold agar tidak ketutup bottom bar
-                    contentPadding = PaddingValues(bottom = 24.dp) // Extra space di bawah list
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
 
                     // 1. GAMBAR HEADER
